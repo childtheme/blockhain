@@ -1,41 +1,77 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tap Game</title>
+    <title>Tap Game with Random Toys</title>
     <style>
         body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #74ebd5, #acb6e5);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden; /* Убираем полосу прокрутки */
         }
+
         h1 {
-            font-size: 2.5rem;
-            color: #333;
-        }
-        p {
-            font-size: 1.5rem;
-        }
-        button {
-            padding: 15px 30px;
-            font-size: 1.5rem;
-            cursor: pointer;
-            border: none;
-            background-color: #4CAF50;
+            font-size: 3rem;
             color: white;
-            border-radius: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
         }
+
+        p {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 20px 40px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            background-color: #ff6b6b;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
         button:hover {
-            background-color: #45a049;
+            background-color: #ff4e50;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        #score {
+            font-weight: bold;
+            color: #ffffff;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .toy {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 1;
+            pointer-events: none; /* Чтобы игрушки не мешали кликам по кнопке */
         }
     </style>
 </head>
 <body>
-    <h1>Tap Game</h1>
-    <p>Score: <span id="score">0</span></p>
-    <button id="tap-button">Tap me!</button>
+    <div class="game-container">
+        <h1>Tap Game</h1>
+        <p>Score: <span id="score">0</span></p>
+        <button id="tap-button">Tap me!</button>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -43,10 +79,59 @@
             const scoreDisplay = document.getElementById('score');
             const tapButton = document.getElementById('tap-button');
 
-            tapButton.addEventListener('click', function() {
+            tapButton.addEventListener('click', function(e) {
+                // Увеличение счета
                 score++;
                 scoreDisplay.textContent = score;
+
+                // Эффект случайного вылета игрушек
+                createRandomToy(e.clientX, e.clientY);
             });
+
+            function createRandomToy(x, y) {
+                const toy = document.createElement('div');
+                toy.classList.add('toy');
+                toy.style.width = '30px'; // Размер игрушки
+                toy.style.height = '30px';
+                toy.style.backgroundColor = getRandomColor();
+                toy.style.left = `${x}px`;
+                toy.style.top = `${y}px`;
+                toy.style.transform = 'translate(-50%, -50%)';
+                document.body.appendChild(toy);
+
+                // Случайные параметры анимации
+                const randomAngle = Math.random() * 2 * Math.PI; // Случайный угол в радианах
+                const distance = Math.random() * 200 + 100; // Случайное расстояние
+                const duration = Math.random() * 1000 + 500; // Случайная длительность анимации
+
+                // Задаем конечные координаты
+                const targetX = x + Math.cos(randomAngle) * distance;
+                const targetY = y + Math.sin(randomAngle) * distance;
+
+                // Запускаем анимацию
+                toy.animate([
+                    { transform: 'translate(-50%, -50%)', opacity: 1 },
+                    { transform: `translate(${targetX - x}px, ${targetY - y}px)`, opacity: 0 }
+                ], {
+                    duration: duration,
+                    easing: 'ease-out',
+                    fill: 'forwards'
+                });
+
+                // Удаляем элемент после завершения анимации
+                setTimeout(() => {
+                    toy.remove();
+                }, duration);
+            }
+
+            function getRandomColor() {
+                const letters = '0123456789ABCDEF';
+                let color = '#';
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
         });
     </script>
 </body>
